@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<title>Seinäkalenteri</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  color: white;
+  background: #111;
+}
+
+#background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 1s ease;
+}
+
+#shade {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: rgba(0,0,0,0.25);
+}
+
+.page {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  height: 100vh;
+
+  padding:
+    calc(16px + 1cm)
+    1cm
+    12px
+    1cm;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+/* =========================
+   YLÄOSA
+========================= */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.date {
+  font-size: 28px;
+  font-weight: 750;
+  line-height: 1.05;
+}
+
+.weekday {
+  font-size: 17px;
+  opacity: 0.78;
+  margin-top: 5px;
+  text-transform: capitalize;
+}
+
+.clock {
+  font-size: 45px;
+  font-weight: 300;
+  letter-spacing: -1px;
+}
+
+
+/* =========================
+   SÄÄ
+========================= */
+
+.weather {
+  min-height: 92px;
+
+  padding: 9px 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  border-radius: 20px;
+
+  background: rgba(20,22,28,0.52);
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.weather-icon {
+  font-size: 34px;
+  width: 42px;
+  text-align: center;
+}
+
+.weather-main {
+  min-width: 0;
+}
+
+.temperature {
+  font-size: 25px;
+  font-weight: 650;
+}
+
+.weather-text {
+  font-size: 12px;
+  opacity: 0.72;
+  margin-top: 1px;
+}
+
+.weather-hours {
+  font-size: 11px;
+  opacity: 0.75;
+  margin-top: 5px;
+  white-space: nowrap;
+}
+
+.weather-savonian {
+  font-size: 12px;
+  line-height: 1.25;
+  opacity: 0.80;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+
+/* =========================
+   KALENTERI
+========================= */
+
+.calendar-box {
+  flex: 1;
+  min-height: 0;
+
+  border-radius: 20px;
+
+  background: rgba(15,18,24,0.44);
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  border: 1px solid rgba(255,255,255,0.18);
+
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-title {
+  height: 42px;
+  flex: none;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 15px;
+
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: 1.2px;
+
+  background: rgba(15,18,24,0.25);
+}
+
+#eventCount {
+  margin-left: auto;
+  font-size: 11px;
+  opacity: 0.55;
+}
+
+.events {
+  overflow: hidden;
+  padding: 0 15px 8px;
+}
+
+.event {
+  display: flex;
+  gap: 12px;
+
+  padding: 10px 0;
+
+  border-top: 1px solid rgba(255,255,255,0.14);
+}
+
+.event:first-child {
+  border-top: 0;
+}
+
+.event-time {
+  width: 64px;
+  flex: none;
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.event-content {
+  min-width: 0;
+}
+
+.event-name {
+  font-size: 16px;
+  font-weight: 650;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-location {
+  font-size: 12px;
+  opacity: 0.68;
+
+  margin-top: 3px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-source {
+  display: inline-block;
+
+  margin-top: 5px;
+  padding: 2px 6px;
+
+  border-radius: 6px;
+
+  font-size: 9px;
+
+  background: rgba(255,255,255,0.12);
+
+  opacity: 0.7;
+}
+
+.status {
+  font-size: 13px;
+  opacity: 0.70;
+  padding: 14px 0;
+}
+
+
+/* =========================
+   SEURAAVAT PÄIVÄT
+========================= */
+
+.bottom {
+  height: 27%;
+  min-height: 125px;
+
+  display: grid;
+
+  grid-template-columns: repeat(3,1fr);
+
+  gap: 8px;
+}
+
+.day {
+  padding: 11px;
+
+  border-radius: 16px;
+
+  background: rgba(20,22,28,0.46);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  border: 1px solid rgba(255,255,255,0.14);
+
+  overflow: hidden;
+}
+
+.day-name {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.day-info {
+  margin-top: 7px;
+
+  font-size: 11px;
+  line-height: 1.35;
+
+  opacity: 0.75;
+
+  overflow: hidden;
+}
+
+.day-event {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  margin-bottom: 3px;
+}
+
+.footer {
+  text-align: center;
+  font-size: 9px;
+  opacity: 0.45;
+}
+
+
+/* =========================
+   PIENEMPI NÄYTTÖ
+========================= */
+
+@media (max-height: 700px) {
+
+  .date {
+    font-size: 24px;
+  }
+
+  .clock {
+    font-size: 38px;
+  }
+
+  .weather {
+    min-height: 78px;
+  }
+
+  .bottom {
+    min-height: 105px;
+  }
+
+  .event {
+    padding: 7px 0;
+  }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div id="background"></div>
+<div id="shade"></div>
+
+
+<div class="page">
+
+
+  <!-- =====================
+       PÄIVÄ JA KELLO
+  ====================== -->
+
+  <div class="header">
+
+    <div>
+
+      <div id="date" class="date"></div>
+
+      <div id="weekday" class="weekday"></div>
+
+    </div>
+
+    <div id="clock" class="clock"></div>
+
+  </div>
+
+
+  <!-- =====================
+       SÄÄ
+  ====================== -->
+
+  <div class="weather">
+
+    <div id="weatherIcon" class="weather-icon">
+      ☀️
+    </div>
+
+    <div class="weather-main">
+
+      <div id="temperature" class="temperature">
+        --° / --°
+      </div>
+
+      <div id="weatherText" class="weather-text">
+        Haetaan tämän päivän säätä…
+      </div>
+
+      <div id="weatherHours" class="weather-hours">
+        08 --° · 12 --° · 16 --° · 20 --°
+      </div>
+
+      <div id="weatherSavonian" class="weather-savonian">
+        Katotaanpa mitä päevä tuo tullessaan…
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================
+       TÄMÄN PÄIVÄN KALENTERI
+  ====================== -->
+
+  <div class="calendar-box">
+
+    <div class="calendar-title">
+
+      TAPAHTUMAT
+
+      <span id="eventCount"></span>
+
+    </div>
+
+    <div id="events" class="events">
+
+      <div class="status">
+        Haetaan kalenteria…
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================
+       SEURAAVAT 3 PÄIVÄÄ
+  ====================== -->
+
+  <div class="bottom">
+
+
+    <div class="day">
+
+      <div id="day1" class="day-name"></div>
+
+      <div id="day1info" class="day-info">
+        Kalenteri
+      </div>
+
+    </div>
+
+
+    <div class="day">
+
+      <div id="day2" class="day-name"></div>
+
+      <div id="day2info" class="day-info">
+        Kalenteri
+      </div>
+
+    </div>
+
+
+    <div class="day">
+
+      <div id="day3" class="day-name"></div>
+
+      <div id="day3info" class="day-info">
+        Kalenteri
+      </div>
+
+    </div>
+
+
+  </div>
+
+
+  <div class="footer">
+
+    Seinäkalenteri · päivitetty
+    <span id="updated"></span>
+
+  </div>
+
+
+</div>
+
+
+
+<script>
+
+
+/* ========================================
+   PÄIVÄ + KELLO
+======================================== */
+
+
+const weekdays = [
+
+  "sunnuntai",
+  "maanantai",
+  "tiistai",
+  "keskiviikko",
+  "torstai",
+  "perjantai",
+  "lauantai"
+
+];
+
+
+const months = [
+
+  "tammikuuta",
+  "helmikuuta",
+  "maaliskuuta",
+  "huhtikuuta",
+  "toukokuuta",
+  "kesäkuuta",
+  "heinäkuuta",
+  "elokuuta",
+  "syyskuuta",
+  "lokakuuta",
+  "marraskuuta",
+  "joulukuuta"
+
+];
+
+
+function updateClock() {
+
+  const now = new Date();
+
+
+  document.getElementById("date").textContent =
+
+    now.getDate()
+    + ". "
+    + months[now.getMonth()];
+
+
+  document.getElementById("weekday").textContent =
+
+    weekdays[now.getDay()];
+
+
+  document.getElementById("clock").textContent =
+
+    now.toLocaleTimeString(
+      "fi-FI",
+      {
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
+
+
+  document.getElementById("updated").textContent =
+
+    now.toLocaleTimeString(
+      "fi-FI",
+      {
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
+
+
+  for (let i = 1; i <= 3; i++) {
+
+    const d = new Date(now);
+
+    d.setDate(
+      now.getDate() + i
+    );
+
+
+    document.getElementById(
+      "day" + i
+    ).textContent =
+
+      weekdays[d.getDay()]
+        .slice(0,3)
+        .toUpperCase()
+
+      + " "
+
+      + d.getDate()
+
+      + "."
+
+      + (d.getMonth() + 1)
+
+      + ".";
+
+  }
+
+}
+
+
+updateClock();
+
+setInterval(
+  updateClock,
+  1000
+);
+
+
+
+/* ========================================
+   SÄÄ
+======================================== */
+
+
+async function updateWeather() {
+
+  try {
+
+    const url =
+
+      "https://api.open-meteo.com/v1/forecast"
+      + "?latitude=60.2055"
+      + "&longitude=24.6559"
+      + "&hourly=temperature_2m,weather_code"
+      + "&daily=temperature_2m_max,temperature_2m_min,weather_code"
+      + "&timezone=Europe%2FHelsinki"
+      + "&forecast_days=3";
+
+
+    const response =
+      await fetch(url);
+
+
+    const data =
+      await response.json();
+
+
+    const now =
+      new Date();
+
+
+    const min =
+      Math.round(
+        data.daily.temperature_2m_min[0]
+      );
+
+
+    const max =
+      Math.round(
+        data.daily.temperature_2m_max[0]
+      );
+
+
+    function temperatureAt(hour) {
+
+      const index =
+
+        data.hourly.time.findIndex(
+          function(t) {
+
+            const d = new Date(t);
+
+            return (
+              d.getDate() === now.getDate()
+              &&
+              d.getMonth() === now.getMonth()
+              &&
+              d.getHours() === hour
+            );
+
+          }
+        );
+
+
+      if (index === -1) {
+
+        return "--";
+
+      }
+
+
+      return Math.round(
+        data.hourly.temperature_2m[index]
+      );
+
+    }
+
+
+    const t08 =
+      temperatureAt(8);
+
+
+    const t12 =
+      temperatureAt(12);
+
+
+    const t16 =
+      temperatureAt(16);
+
+
+    const t20 =
+      temperatureAt(20);
+
+
+    const currentHour =
+      now.getHours();
+
+
+    const currentIndex =
+
+      data.hourly.time.findIndex(
+        function(t) {
+
+          const d = new Date(t);
+
+          return (
+            d.getDate() === now.getDate()
+            &&
+            d.getMonth() === now.getMonth()
+            &&
+            d.getHours() === currentHour
+          );
+
+        }
+      );
+
+
+    const code =
+
+      currentIndex >= 0
+
+        ? data.hourly.weather_code[currentIndex]
+
+        : data.daily.weather_code[0];
+
+
+    let icon = "☀️";
+
+    let text = "Aurinkoista";
+
+    let savon =
+      "Aeka kommee päevä tulloo, aurinko paestaa ja lämpöe piäsöö mukavasti.";
+
+
+    if (code === 0) {
+
+      icon = "☀️";
+
+      text = "Aurinkoista";
+
+      savon =
+        "Aeka kommee päevä tulloo, aurinko paestaa ja lämpöe piäsöö mukavasti.";
+
+    }
+
+
+    else if (code === 1) {
+
+      icon = "🌤️";
+
+      text = "Enimmäkseen selkeää";
+
+      savon =
+        "Eipä oo pilvillä paljoa asiaa, aurinko paestaa enimmäkseen.";
+
+    }
+
+
+    else if (code === 2) {
+
+      icon = "⛅";
+
+      text = "Puolipilvistä";
+
+      savon =
+        "Pilvenhattaroo seassa, mutta kyllä se aurinkokin sieltä kurkkii.";
+
+    }
+
+
+    else if (code === 3) {
+
+      icon = "☁️";
+
+      text = "Pilvistä";
+
+      savon =
+        "Pilvee on taevas aikalailla, aurinkoo ei taija paljo näkkyy.";
+
+    }
+
+
+    else if (
+      code >= 45 &&
+      code <= 48
+    ) {
+
+      icon = "🌫️";
+
+      text = "Sumuista";
+
+      savon =
+        "Summoo on niin jotta näkkyykö tuo naapurin talokkaa.";
+
+    }
+
+
+    else if (
+      code >= 51 &&
+      code <= 57
+    ) {
+
+      icon = "🌦️";
+
+      text = "Heikkoa sadetta";
+
+      savon =
+        "Pientä tihutusta saattaa lupsauttoo päivän mittaan.";
+
+    }
+
+
+    else if (
+      code >= 61 &&
+      code <= 67
+    ) {
+
+      icon = "🌧️";
+
+      text = "Sadetta";
+
+      savon =
+        "Vettä sitä piäsöö päivän mittaan, rapputakki kannattaa ottaa matkaan.";
+
+    }
+
+
+    else if (
+      code >= 71 &&
+      code <= 77
+    ) {
+
+      icon = "🌨️";
+
+      text = "Lumisadetta";
+
+      savon =
+        "Lunta tulloo taivaalta, jotta saapii kohta kolata.";
+
+    }
+
+
+    else if (
+      code >= 80 &&
+      code <= 82
+    ) {
+
+      icon = "🌦️";
+
+      text = "Sadekuuroja";
+
+      savon =
+        "Kuuroo tulloo sillon tällön, mutta välissä piäsöö kuivana.";
+
+    }
+
+
+    else if (code >= 95) {
+
+      icon = "⛈️";
+
+      text = "Ukkosta";
+
+      savon =
+        "Ukkosta piisaa, jotta parempi pysytellä sisällä.";
+
+    }
+
+
+    document.getElementById(
+      "weatherIcon"
+    ).textContent = icon;
+
+
+    document.getElementById(
+      "temperature"
+    ).textContent =
+
+      min
+      + "° / "
+      + max
+      + "°";
+
+
+    document.getElementById(
+      "weatherText"
+    ).textContent =
+
+      text
+      + " · Espoo";
+
+
+    document.getElementById(
+      "weatherHours"
+    ).textContent =
+
+      "08 " + t08 + "° · "
+      + "12 " + t12 + "° · "
+      + "16 " + t16 + "° · "
+      + "20 " + t20 + "°";
+
+
+    document.getElementById(
+      "weatherSavonian"
+    ).textContent = savon;
+
+  }
+
+
+  catch (error) {
+
+    document.getElementById(
+      "weatherText"
+    ).textContent =
+      "Säätä ei nyt piäse kahtomaan";
+
+
+    document.getElementById(
+      "weatherSavonian"
+    ).textContent =
+      "Jotta suapii arvailla ite, millanen päevä tästä tulloo.";
+
+  }
+
+}
+
+
+updateWeather();
+
+
+setInterval(
+  updateWeather,
+  15 * 60 * 1000
+);
+
+
+
+/* ========================================
+   TAUSTAKUVAT
+   VAIHTO 10 MIN VÄLEIN
+======================================== */
+
+
+const backgrounds = [
+
+  "https://picsum.photos/seed/seina1/1200/2000",
+
+  "https://picsum.photos/seed/seina2/1200/2000",
+
+  "https://picsum.photos/seed/seina3/1200/2000",
+
+  "https://picsum.photos/seed/seina4/1200/2000",
+
+  "https://picsum.photos/seed/seina5/1200/2000"
+
+];
+
+
+let backgroundIndex = 0;
+
+
+function changeBackground() {
+
+  const bg =
+    document.getElementById(
+      "background"
+    );
+
+
+  bg.style.opacity = "0.2";
+
+
+  setTimeout(
+    function() {
+
+      bg.style.backgroundImage =
+
+        "url('"
+        + backgrounds[backgroundIndex]
+        + "')";
+
+
+      bg.style.opacity = "1";
+
+
+      backgroundIndex++;
+
+
+      if (
+        backgroundIndex >=
+        backgrounds.length
+      ) {
+
+        backgroundIndex = 0;
+
+      }
+
+    },
+    500
+  );
+
+}
+
+
+changeBackground();
+
+
+setInterval(
+  changeBackground,
+  10 * 60 * 1000
+);
+
+
+
+/* ========================================
+   GOOGLE + MYCLUB
+======================================== */
+
+
+const CALENDAR_API =
+
+  "https://script.google.com/macros/s/AKfycbyFlT1Po0JZ6Vu_TpmkZNwlUsS94S37AZvYr5QE7GY_kgdfgiOGM3hdDCrSfCx1n85uNg/exec";
+
+
+let calendarEvents = [];
+
+
+function loadCalendar() {
+
+
+  window.calendarCallback =
+
+    function(data) {
+
+
+      if (
+        !data ||
+        !Array.isArray(data.calendars)
+      ) {
+
+        document.getElementById(
+          "events"
+        ).innerHTML =
+
+          '<div class="status">'
+          + "Kalenteria ei saatu ladattua."
+          + "</div>";
+
+        return;
+
+      }
+
+
+      let allEvents = [];
+
+
+      data.calendars.forEach(
+        function(calendar) {
+
+
+          if (
+            !Array.isArray(
+              calendar.events
+            )
+          ) {
+
+            return;
+
+          }
+
+
+          const calendarName =
+            calendar.name ||
+            "Google";
+
+
+          const source =
+
+            /myclub/i.test(
+              calendarName
+            )
+
+              ? "MyClub"
+
+              : calendarName;
+
+
+          calendar.events.forEach(
+            function(e) {
+
+
+              if (!e.title) {
+
+                return;
+
+              }
+
+
+              const start =
+                new Date(e.start);
+
+
+              const end =
+                new Date(e.end);
+
+
+              if (
+                isNaN(
+                  start.getTime()
+                )
+              ) {
+
+                return;
+
+              }
+
+
+              allEvents.push({
+
+                title:
+                  e.title,
+
+                start:
+                  start,
+
+                end:
+                  end,
+
+                location:
+                  e.location || "",
+
+                allDay:
+                  e.allDay === true,
+
+                source:
+                  source,
+
+                calendarName:
+                  calendarName
+
+              });
+
+            }
+          );
+
+        }
+      );
+
+
+      const unique = [];
+
+      const seen = new Set();
+
+
+      allEvents.forEach(
+        function(e) {
+
+
+          const key =
+
+            e.title
+            + "|"
+            + e.start.getTime()
+            + "|"
+            + e.end.getTime();
+
+
+          if (
+            !seen.has(key)
+          ) {
+
+            seen.add(key);
+
+            unique.push(e);
+
+          }
+
+        }
+      );
+
+
+      calendarEvents =
+
+        unique.sort(
+          function(a,b) {
+
+            return a.start - b.start;
+
+          }
+        );
+
+
+      renderToday();
+
+      renderFutureDays();
+
+    };
+
+
+  const old =
+    document.getElementById(
+      "calendarScript"
+    );
+
+
+  if (old) {
+
+    old.remove();
+
+  }
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  script.id =
+    "calendarScript";
+
+
+  script.src =
+
+    CALENDAR_API
+    + "?callback=calendarCallback&t="
+    + Date.now();
+
+
+  script.onerror =
+
+    function() {
+
+      document.getElementById(
+        "events"
+      ).innerHTML =
+
+        '<div class="status">'
+        + "Kalenteriyhteys ei toimi."
+        + "</div>";
+
+    };
+
+
+  document.body.appendChild(
+    script
+  );
+
+}
+
+
+
+function sameDay(a,b) {
+
+  return (
+
+    a.getFullYear() ===
+      b.getFullYear()
+
+    &&
+
+    a.getMonth() ===
+      b.getMonth()
+
+    &&
+
+    a.getDate() ===
+      b.getDate()
+
+  );
+
+}
+
+
+
+function renderToday() {
+
+
+  const now =
+    new Date();
+
+
+  const todayEvents =
+
+    calendarEvents.filter(
+      function(e) {
+
+        return sameDay(
+          e.start,
+          now
+        );
+
+      }
+    );
+
+
+  const container =
+    document.getElementById(
+      "events"
+    );
+
+
+  const count =
+    document.getElementById(
+      "eventCount"
+    );
+
+
+  count.textContent =
+
+    todayEvents.length
+
+      ? todayEvents.length
+        + " tapahtuma"
+        + (
+          todayEvents.length === 1
+            ? ""
+            : "a"
+        )
+
+      : "";
+
+
+  if (
+    todayEvents.length === 0
+  ) {
+
+    container.innerHTML =
+
+      '<div class="status">'
+      + "Ei tapahtumia tänään"
+      + "</div>";
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+
+    todayEvents
+      .slice(0,10)
+      .map(
+        function(e) {
+
+
+          const time =
+
+            e.allDay
+
+              ? "Koko päivä"
+
+              : e.start.toLocaleTimeString(
+                  "fi-FI",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  }
+                );
+
+
+          const sourceLabel =
+
+            /myclub/i.test(
+              e.source
+            )
+
+              ? "MyClub"
+
+              : "Google";
+
+
+          return `
+
+            <div class="event">
+
+              <div class="event-time">
+                ${time}
+              </div>
+
+              <div class="event-content">
+
+                <div class="event-name">
+                  ${escapeHtml(e.title)}
+                </div>
+
+                ${
+                  e.location
+                    ? `
+                      <div class="event-location">
+                        ${escapeHtml(e.location)}
+                      </div>
+                    `
+                    : ""
+                }
+
+                <span class="event-source">
+                  ${sourceLabel}
+                </span>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+
+function renderFutureDays() {
+
+
+  const now =
+    new Date();
+
+
+  for (
+    let i = 1;
+    i <= 3;
+    i++
+  ) {
+
+
+    const day =
+      new Date(now);
+
+
+    day.setDate(
+      now.getDate() + i
+    );
+
+
+    const events =
+
+      calendarEvents.filter(
+        function(e) {
+
+          return sameDay(
+            e.start,
+            day
+          );
+
+        }
+      );
+
+
+    const target =
+
+      document.getElementById(
+        "day" + i + "info"
+      );
+
+
+    if (
+      events.length === 0
+    ) {
+
+      target.innerHTML =
+        "Ei tapahtumia";
+
+      continue;
+
+    }
+
+
+    target.innerHTML =
+
+      events
+        .slice(0,3)
+        .map(
+          function(e) {
+
+
+            const time =
+
+              e.allDay
+
+                ? "Koko päivä"
+
+                : e.start.toLocaleTimeString(
+                    "fi-FI",
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    }
+                  );
+
+
+            return `
+
+              <div class="day-event">
+
+                ${time}
+                ${escapeHtml(e.title)}
+
+              </div>
+
+            `;
+
+          }
+        )
+        .join("");
+
+
+    if (
+      events.length > 3
+    ) {
+
+      target.innerHTML +=
+
+        `<div class="day-event">
+          + ${events.length - 3} muuta
+        </div>`;
+
+    }
+
+  }
