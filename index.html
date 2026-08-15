@@ -701,7 +701,7 @@ html,body{
       </div>
 
       <div id="weatherHours" class="weather-hours">
-        08 --° · 12 --° · 16 --° · 20 --°
+        🕗 --°   ·   🕛 --°   ·   🕓 --°   ·   🕗 --°
       </div>
 
       <div id="weatherDays" class="weather-days">
@@ -1104,7 +1104,7 @@ async function updateWeather(){
       "&hourly=temperature_2m,weather_code,precipitation_probability,precipitation,wind_speed_10m"+
       "&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,precipitation_sum,wind_speed_10m_max"+
       "&timezone=Europe%2FHelsinki"+
-      "&forecast_days=3";
+      "&forecast_days=4";
 
     const response=await fetch(url);
 
@@ -1113,16 +1113,20 @@ async function updateWeather(){
     }
 
     const data=await response.json();
-
     const now=new Date();
 
-    const min=Math.round(
-      data.daily.temperature_2m_min[0]
-    );
+    /*
+      Ennen klo 18 sääkortti kertoo tästä päivästä.
+      Klo 18 jälkeen sääkortti kertoo huomisesta.
+    */
+    const evening=now.getHours()>=18;
+    const dayIndex=evening ? 1 : 0;
 
-    const max=Math.round(
-      data.daily.temperature_2m_max[0]
-    );
+    const targetDate=new Date(now);
+    targetDate.setDate(now.getDate()+dayIndex);
+
+    const min=Math.round(data.daily.temperature_2m_min[dayIndex]);
+    const max=Math.round(data.daily.temperature_2m_max[dayIndex]);
 
     function tempAt(hour){
 
@@ -1131,21 +1135,16 @@ async function updateWeather(){
         const d=new Date(data.hourly.time[i]);
 
         if(
-          d.getDate()===now.getDate() &&
-          d.getMonth()===now.getMonth() &&
+          d.getFullYear()===targetDate.getFullYear() &&
+          d.getMonth()===targetDate.getMonth() &&
+          d.getDate()===targetDate.getDate() &&
           d.getHours()===hour
         ){
-
-          return Math.round(
-            data.hourly.temperature_2m[i]
-          );
-
+          return Math.round(data.hourly.temperature_2m[i]);
         }
-
       }
 
       return "--";
-
     }
 
     const t08=tempAt(8);
@@ -1153,38 +1152,10 @@ async function updateWeather(){
     const t16=tempAt(16);
     const t20=tempAt(20);
 
-    let currentIndex=-1;
-
-    for(let i=0;i<data.hourly.time.length;i++){
-
-      const d=new Date(data.hourly.time[i]);
-
-      if(
-        d.getDate()===now.getDate() &&
-        d.getMonth()===now.getMonth() &&
-        d.getHours()===now.getHours()
-      ){
-
-        currentIndex=i;
-        break;
-
-      }
-
-    }
-
-    if(currentIndex<0){
-      currentIndex=0;
-    }
-
-    const code=
-      data.hourly.weather_code[currentIndex];
-
-    const rainProb=
-      data.hourly.precipitation_probability[currentIndex] ?? 0;
-
-    const wind=Math.round(
-      data.hourly.wind_speed_10m[currentIndex] ?? 0
-    );
+    /* Käytetään koko päivän sääluokitusta, ei vain tämän hetken säätä. */
+    const code=data.daily.weather_code[dayIndex];
+    const rainProb=data.daily.precipitation_probability_max[dayIndex] ?? 0;
+    const wind=Math.round(data.daily.wind_speed_10m_max[dayIndex] ?? 0);
 
     let icon="☀️";
     let text="Aurinkoista";
@@ -1228,51 +1199,58 @@ async function updateWeather(){
 
     let savon="";
 
-    if(code===0){
-      savon="Aeka kommee päevä tulloo, aurinko paestaa.";
-    }
-    else if(code<=2){
-      savon="Pilvenhattaroo on seassa, mutta aurinkooki näkkyy.";
-    }
-    else if(code===3){
-      savon="Pilvee on taevas jotta aurinkoo ei paljo näkkyne.";
-    }
-    else if(code<=48){
-      savon="Summoo näyttää olevan, ajellaan maltilla.";
-    }
-    else if(code<=67){
-      savon="Vettä tihhuuttaa tai sattaa, kastumata ei taija piäsöö.";
-    }
-    else if(code<=82){
-      savon="Kuuroja piisaa, välillä sattaa jotta ropisee.";
+    if(evening){
+
+      if(code===0){
+        savon="Huomiselle näyttää aeka kommee keli, aurinko paestaa.";
+      }
+      else if(code<=2){
+        savon="Huomenna on pilvenhattaroo seassa, mutta aurinkooki näkkyy.";
+      }
+      else if(code===3){
+        savon="Huomiseksi luvataan pilvistä päevää, aurinkoo ei taija paljo näkyä.";
+      }
+      else if(code<=48){
+        savon="Huomiselle näyttää summoo, aamulla kannattaa liikkuu maltilla.";
+      }
+      else if(code<=67){
+        savon="Huomenna vettä taitaa tulla, jotta sateenvarjo kannattaa kaivaa valamiiksi.";
+      }
+      else if(code<=82){
+        savon="Huomiselle luvataan kuuroja, välillä saattaa ropista ihan kunnolla.";
+      }
+      else{
+        savon="Huomiselle näyttää vähän rajumpaa keliä, kahtellaan aamulla tarkemmin.";
+      }
+
     }
     else{
-      savon="Nyt on semmonen keli jotta pysytään mieluummin sisällä.";
+
+      if(code===0){
+        savon="Aeka kommee päevä tulloo, aurinko paestaa.";
+      }
+      else if(code<=2){
+        savon="Pilvenhattaroo on päivän mittaan seassa, mutta aurinkooki näkkyy.";
+      }
+      else if(code===3){
+        savon="Pilvee näyttää riittävän tälle päivälle, aurinkoo ei paljo näkkyne.";
+      }
+      else if(code<=48){
+        savon="Summoo saattaa olla päivän mittaan, liikenteessä kannattaa olla tarkkana.";
+      }
+      else if(code<=67){
+        savon="Vettä saattaa tulla päivän mittaan, kastumata ei välttämättä piäsöö.";
+      }
+      else if(code<=82){
+        savon="Kuuroja näyttää tulevan päivän mittaan, välillä saattaa ropista.";
+      }
+      else{
+        savon="Tälle päivälle näyttää vähän rajumpaa keliä, ulukona kannattaa kahtoo tarkkaan.";
+      }
+
     }
 
-    const tomorrowMin=Math.round(
-      data.daily.temperature_2m_min[1]
-    );
-
-    const tomorrowMax=Math.round(
-      data.daily.temperature_2m_max[1]
-    );
-
-    const afterMin=Math.round(
-      data.daily.temperature_2m_min[2]
-    );
-
-    const afterMax=Math.round(
-      data.daily.temperature_2m_max[2]
-    );
-
-    const todayRain=
-      data.daily.precipitation_probability_max[0] ?? 0;
-
-    const wet=
-      todayRain>=35 ||
-      (code>=51 && code<=82);
-
+    const wet=rainProb>=35 || (code>=51 && code<=82);
     const cold=max<12;
     const cool=max<17;
 
@@ -1280,40 +1258,63 @@ async function updateWeather(){
     let kainuu="";
 
     if(wet && cold){
-
       clothing="🧥 ☔ 🧤  Takki ja sateensuoja mukaan";
-      kainuu="Ota takki ja sateenvarjo mukkaan, jotta et oo illasta märkä ja viluissas.";
-
+      kainuu=evening
+        ? "Huomiseksi takki ja sateenvarjo valamiiksi, keli näyttää märältä ja vilakalta."
+        : "Ota takki ja sateenvarjo mukkaan, jotta et oo illasta märkä ja viluissas.";
     }
     else if(wet){
-
       clothing="☔  Sateenvarjo mukaan";
-      kainuu="Pistä sateenvarjo mukkaan, vettä saattaa lupsauttoo niskaan.";
-
+      kainuu=evening
+        ? "Huomiseksi sateenvarjo hollille, vettä saattaa lupsauttoo niskaan."
+        : "Pistä sateenvarjo mukkaan, vettä saattaa lupsauttoo niskaan.";
     }
     else if(cold){
-
       clothing="🧥 🧤  Lämpimästi päälle";
-      kainuu="Ota takki mukkaan, ulukona on sen verran vilakkaa.";
-
+      kainuu=evening
+        ? "Huomenna on vilakkaa, takki kannattaa panna valamiiksi."
+        : "Ota takki mukkaan, ulukona on sen verran vilakkaa.";
     }
     else if(cool){
-
       clothing="🧥  Kevyt takki mukaan";
-      kainuu="Jottai takkia kannattaa ottaa mukkaan, aamu ja ilta voipi olla viileetä.";
-
+      kainuu=evening
+        ? "Huomiselle kannattaa varata kevyt takki, varsinki aamuksi."
+        : "Jottai takkia kannattaa ottaa mukkaan, aamu ja ilta voipi olla viileetä.";
     }
     else if(max>=22){
-
       clothing="🕶️ 🧢  Kevyt vaatetus";
-      kainuu="Eipä tarvihe paljoa päälle, kesävermeillä pärjeilee.";
-
+      kainuu=evening
+        ? "Huomiselle näyttää lämpimältä, kesävermeet riittääpi."
+        : "Eipä tarvihe paljoa päälle, kesävermeillä pärjeilee.";
     }
     else{
-
       clothing="👕  Normaali vaatetus";
-      kainuu="Ihan tavallisilla vaatteilla pärjeilee, ei hättää.";
+      kainuu=evening
+        ? "Huomenna pärjää ihan tavallisilla vaatteilla."
+        : "Ihan tavallisilla vaatteilla pärjeilee, ei hättää.";
+    }
 
+    let nextDaysHtml="";
+
+    if(evening){
+      const afterTomorrowMin=Math.round(data.daily.temperature_2m_min[2]);
+      const afterTomorrowMax=Math.round(data.daily.temperature_2m_max[2]);
+      const dayAfterMin=Math.round(data.daily.temperature_2m_min[3]);
+      const dayAfterMax=Math.round(data.daily.temperature_2m_max[3]);
+
+      nextDaysHtml=
+        "<span>Ylihuomenna "+afterTomorrowMin+"° / "+afterTomorrowMax+"°</span>"+
+        "<span>Sen jälkeen "+dayAfterMin+"° / "+dayAfterMax+"°</span>";
+    }
+    else{
+      const tomorrowMin=Math.round(data.daily.temperature_2m_min[1]);
+      const tomorrowMax=Math.round(data.daily.temperature_2m_max[1]);
+      const afterMin=Math.round(data.daily.temperature_2m_min[2]);
+      const afterMax=Math.round(data.daily.temperature_2m_max[2]);
+
+      nextDaysHtml=
+        "<span>Huomenna "+tomorrowMin+"° / "+tomorrowMax+"°</span>"+
+        "<span>Ylihuomenna "+afterMin+"° / "+afterMax+"°</span>";
     }
 
     document.getElementById("weatherIcon").textContent=icon;
@@ -1322,36 +1323,19 @@ async function updateWeather(){
       min+"° / "+max+"°";
 
     document.getElementById("weatherText").textContent=
-      text+" · Espoo";
+      (evening ? "Huomenna · " : "Tänään · ")+text+" · Espoo";
 
+    /* Kellokuvakkeet erottavat kellonajat selvästi lämpötiloista. */
     document.getElementById("weatherHours").textContent=
-      "08 "+t08+"° · 12 "+t12+
-      "° · 16 "+t16+
-      "° · 20 "+t20+"°";
+      "🕗 "+t08+"°   ·   🕛 "+t12+"°   ·   🕓 "+t16+"°   ·   🕗 "+t20+"°";
 
-    document.getElementById("weatherDays").innerHTML=
-      "<span>Huomenna "+
-      tomorrowMin+
-      "° / "+
-      tomorrowMax+
-      "°</span>"+
-      "<span>Ylihuomenna "+
-      afterMin+
-      "° / "+
-      afterMax+
-      "°</span>";
+    document.getElementById("weatherDays").innerHTML=nextDaysHtml;
 
     document.getElementById("weatherExtra").textContent=
-      "Tuuli "+
-      wind+
-      " km/h · sateen mahdollisuus "+
-      todayRain+
-      " %";
+      "Tuuli enintään "+wind+" km/h · sateen mahdollisuus "+rainProb+" %";
 
     document.getElementById("weatherSavonian").textContent=savon;
-
     document.getElementById("clothing").textContent=clothing;
-
     document.getElementById("kainuu").textContent=kainuu;
 
   }catch(e){
@@ -1368,7 +1352,6 @@ async function updateWeather(){
 
     document.getElementById("kainuu").textContent=
       "Kahtopa ulukona ennen lähtöä jotta mitä piättee panna päälle.";
-
   }
 
 }
