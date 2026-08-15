@@ -411,6 +411,103 @@ html,body{
 }
 
 /* =========================
+   TYLSÄÄ / TEKEMISTÄ
+========================= */
+
+.bored-button{
+  border:0;
+  border-radius:14px;
+  padding:11px 17px;
+  background:rgba(255,255,255,.78);
+  box-shadow:0 2px 10px rgba(0,0,0,.10);
+  font-size:15px;
+  font-weight:800;
+  color:#17202a;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.bored-button:active{
+  transform:scale(.97);
+}
+
+.bored-modal{
+  position:fixed;
+  z-index:40;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(520px,90vw);
+  max-height:82vh;
+  overflow:auto;
+  padding:24px;
+  border-radius:24px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 8px 35px rgba(0,0,0,.28);
+  backdrop-filter:blur(15px);
+  -webkit-backdrop-filter:blur(15px);
+  display:none;
+}
+
+.bored-modal.show{display:block}
+
+.bored-title{
+  font-size:24px;
+  font-weight:850;
+  margin-bottom:6px;
+}
+
+.bored-subtitle{
+  font-size:15px;
+  opacity:.68;
+  margin-bottom:18px;
+}
+
+.bored-choices{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.bored-choice{
+  border:0;
+  border-radius:15px;
+  padding:16px 12px;
+  background:rgba(30,40,50,.08);
+  font-size:17px;
+  font-weight:850;
+  cursor:pointer;
+}
+
+.bored-result{
+  margin-top:18px;
+  padding:15px;
+  border-radius:16px;
+  background:rgba(30,40,50,.06);
+  font-size:16px;
+  line-height:1.45;
+  white-space:pre-line;
+}
+
+.bored-close{
+  position:absolute;
+  right:14px;
+  top:14px;
+  border:0;
+  border-radius:50%;
+  width:36px;
+  height:36px;
+  font-size:21px;
+  background:rgba(0,0,0,.08);
+  cursor:pointer;
+}
+
+@media(max-width:500px){
+  .bored-modal{padding:20px}
+  .bored-title{font-size:21px}
+}
+
+/* =========================
    TODO
    Kelluva laatikko.
    EI vaikuta kalenterin kokoon.
@@ -420,7 +517,8 @@ html,body{
   position:fixed;
   z-index:25;
   right:22px;
-  bottom:65px;
+  top:50%;
+  transform:translateY(-50%);
   width:300px;
   max-height:42vh;
   overflow:hidden;
@@ -576,7 +674,8 @@ html,body{
 
   .todo-box{
     right:10px;
-    bottom:48px;
+    top:50%;
+    transform:translateY(-50%);
     width:270px;
   }
 
@@ -612,7 +711,8 @@ html,body{
   .todo-box{
     width:calc(100% - 20px);
     right:10px;
-    bottom:42px;
+    top:50%;
+    transform:translateY(-50%);
     max-height:34vh;
   }
 
@@ -736,6 +836,15 @@ html,body{
 
     </button>
 
+    <button
+      id="boredButton"
+      class="bored-button"
+      onclick="openBoredMenu()">
+
+      😴 TYLSÄÄ
+
+    </button>
+
     <div id="mealStatus" class="meal-status"></div>
 
   </div>
@@ -837,6 +946,26 @@ html,body{
 
 </div>
 
+
+<!-- =========================
+     TYLSÄÄ / TEKEMISTÄ POPUP
+========================= -->
+
+<div id="boredModal" class="bored-modal">
+
+  <button class="bored-close" onclick="closeBoredMenu()">×</button>
+
+  <div class="bored-title">😴 OLETKO:</div>
+  <div class="bored-subtitle">Valitse kumpi tarvitsee tekemistä.</div>
+
+  <div class="bored-choices">
+    <button class="bored-choice" onclick="showActivities('valtteri')">VALTTERI</button>
+    <button class="bored-choice" onclick="showActivities('emilia')">EMILIA</button>
+  </div>
+
+  <div id="boredResult" class="bored-result" style="display:none"></div>
+
+</div>
 
 <!-- =========================
      RUOKALISTAN POPUP
@@ -1875,6 +2004,57 @@ function closeMealPlan(){
 
 
 /* =========================
+   TYLSÄÄ / TEKEMISTÄ
+========================= */
+
+const activities={
+  valtteri:[
+    "🧱 Rakenna LEGOilla tai muilla palikoilla mahdollisimman korkea torni. Aikaa 20 min.",
+    "🕵️ Tee kotietsintä: piilota 5 tavaraa ja piirrä kartta, jonka avulla toinen löytää ne.",
+    "✏️ Piirrä oma sarjakuva, jossa on vähintään 4 ruutua ja yksi hauska juoni.",
+    "⚽ Keksi 10 minuutin pallotemppurata ja yritä parantaa omaa ennätystä.",
+    "✈️ Tee paperilennokki ja järjestä olohuoneessa pisimmän lennon kilpailu.",
+    "🍳 Valmista aikuisen kanssa pieni välipala ja kata samalla pöytä koko perheelle.",
+    "🧩 Valitse palapeli, rakennussarja tai muu keskittymistä vaativa tehtävä ja tee sitä 30 min."
+  ],
+  emilia:[
+    "🎨 Piirrä oma satuhahmo ja keksi sille nimi, koti ja yksi supervoima.",
+    "🧱 Rakenna palikoilla eläintarha ja tee sinne vähintään 5 erilaista eläintä.",
+    "🔎 Tee aarrejahti: etsi kodista 5 punaista, 5 pyöreää ja 5 pehmeää asiaa.",
+    "💃 Laita kolme lempikappaletta soimaan ja keksi jokaiselle oma tanssi.",
+    "🍪 Leivo aikuisen kanssa helppo pieni herkku ja auta myös keittiön siivouksessa.",
+    "📚 Valitse kirja ja lue tai kuuntele sitä 20 minuuttia. Kerro lopuksi yksi asia tarinasta.",
+    "✂️ Tee paperista, kartongista tai askartelutarvikkeista oma pieni eläin tai avaruusalus."
+  ]
+};
+
+function openBoredMenu(){
+  document.getElementById("boredResult").style.display="none";
+  document.getElementById("boredResult").textContent="";
+  document.getElementById("boredModal").classList.add("show");
+}
+
+function closeBoredMenu(){
+  document.getElementById("boredModal").classList.remove("show");
+}
+
+function showActivities(child){
+  const list=activities[child] || [];
+  const shuffled=list.slice().sort(()=>Math.random()-.5);
+  const selected=shuffled.slice(0,3);
+  const name=child==="valtteri" ? "VALTTERILLE" : "EMILIALLE";
+  const result=document.getElementById("boredResult");
+
+  result.textContent=
+    name+" voisi tehdä esimerkiksi:\n\n"+
+    "1. "+selected[0]+"\n\n"+
+    "2. "+selected[1]+"\n\n"+
+    "3. "+selected[2];
+
+  result.style.display="block";
+}
+
+/* =========================
    TODO
 ========================= */
 
@@ -2216,6 +2396,12 @@ document
     }
   );
 
+
+document.getElementById("boredModal").addEventListener("click",function(event){
+  if(event.target===this){
+    closeBoredMenu();
+  }
+});
 
 /* =========================
    ENSIMMÄISET LATAUKSET
