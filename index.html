@@ -411,146 +411,66 @@ html,body{
 }
 
 /* =========================
-   TYLSÄÄ / TEKEMISTÄ
+   TODO + TYLSÄÄ POPUPIT
 ========================= */
 
-.bored-button{
-  border:0;
-  border-radius:14px;
-  padding:11px 17px;
-  background:rgba(255,255,255,.78);
-  box-shadow:0 2px 10px rgba(0,0,0,.10);
-  font-size:15px;
-  font-weight:800;
-  color:#17202a;
-  cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-
-.bored-button:active{
-  transform:scale(.97);
-}
-
-.bored-modal{
+.utility-modal{
   position:fixed;
+  inset:0;
   z-index:40;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:min(520px,90vw);
-  max-height:82vh;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:rgba(20,25,30,.28);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
+
+.utility-modal.show{
+  display:flex;
+}
+
+.utility-card{
+  position:relative;
+  width:min(620px,94vw);
+  max-height:86vh;
   overflow:auto;
   padding:24px;
   border-radius:24px;
   background:rgba(255,255,255,.96);
-  box-shadow:0 8px 35px rgba(0,0,0,.28);
-  backdrop-filter:blur(15px);
-  -webkit-backdrop-filter:blur(15px);
-  display:none;
+  box-shadow:0 8px 35px rgba(0,0,0,.25);
+  -webkit-overflow-scrolling:touch;
 }
 
-.bored-modal.show{display:block}
-
-.bored-title{
-  font-size:24px;
-  font-weight:850;
-  margin-bottom:6px;
-}
-
-.bored-subtitle{
-  font-size:15px;
-  opacity:.68;
-  margin-bottom:18px;
-}
-
-.bored-choices{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.bored-choice{
-  border:0;
-  border-radius:15px;
-  padding:16px 12px;
-  background:rgba(30,40,50,.08);
-  font-size:17px;
-  font-weight:850;
-  cursor:pointer;
-}
-
-.bored-result{
-  margin-top:18px;
-  padding:15px;
-  border-radius:16px;
-  background:rgba(30,40,50,.06);
-  font-size:16px;
-  line-height:1.45;
-  white-space:pre-line;
-}
-
-.bored-close{
+.utility-close{
   position:absolute;
-  right:14px;
+  right:16px;
   top:14px;
+  width:38px;
+  height:38px;
   border:0;
   border-radius:50%;
-  width:36px;
-  height:36px;
-  font-size:21px;
   background:rgba(0,0,0,.08);
+  font-size:22px;
   cursor:pointer;
 }
 
-@media(max-width:500px){
-  .bored-modal{padding:20px}
-  .bored-title{font-size:21px}
-}
-
-/* =========================
-   TODO
-   Kelluva laatikko.
-   EI vaikuta kalenterin kokoon.
-========================= */
-
-.todo-box{
-  position:fixed;
-  z-index:25;
-  right:22px;
-  top:50%;
-  transform:translateY(-50%);
-  width:300px;
-  max-height:42vh;
-  overflow:hidden;
-  border-radius:20px;
-  background:rgba(255,255,255,.88);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,.9);
-  box-shadow:0 5px 25px rgba(0,0,0,.18);
-  padding:14px;
-}
-
-.todo-header{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:10px;
-}
-
-.todo-title{
-  font-size:16px;
+.utility-title{
+  padding-right:48px;
+  font-size:25px;
   font-weight:850;
 }
 
-.todo-count{
-  margin-left:auto;
-  font-size:11px;
-  opacity:.55;
+.utility-subtitle{
+  margin-top:4px;
+  font-size:13px;
+  opacity:.6;
 }
 
-.todo-list{
-  max-height:25vh;
+.todo-list-popup{
+  margin-top:16px;
+  max-height:52vh;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
 }
@@ -558,29 +478,25 @@ html,body{
 .todo-row{
   display:flex;
   align-items:center;
-  gap:9px;
-  padding:8px 3px;
+  gap:12px;
+  padding:10px 3px;
   border-top:1px solid rgba(30,40,50,.10);
 }
 
 .todo-check{
-  width:28px;
-  height:28px;
+  width:32px;
+  height:32px;
   flex:none;
   border:2px solid rgba(30,40,50,.32);
-  border-radius:8px;
-  background:rgba(255,255,255,.75);
+  border-radius:9px;
+  background:white;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:18px;
+  font-size:19px;
   cursor:pointer;
   padding:0;
   -webkit-tap-highlight-color:transparent;
-}
-
-.todo-check:active{
-  transform:scale(.90);
 }
 
 .todo-row.done .todo-check{
@@ -592,7 +508,7 @@ html,body{
 .todo-task{
   min-width:0;
   flex:1;
-  font-size:14px;
+  font-size:18px;
   line-height:1.25;
   font-weight:650;
   word-break:break-word;
@@ -605,49 +521,79 @@ html,body{
 
 .todo-add{
   display:flex;
-  gap:7px;
-  margin-top:10px;
+  gap:8px;
+  margin-top:16px;
 }
 
 .todo-input{
   min-width:0;
   flex:1;
-  height:38px;
+  height:46px;
   border:1px solid rgba(30,40,50,.16);
-  border-radius:10px;
-  padding:0 10px;
-  font-size:14px;
-  background:rgba(255,255,255,.8);
+  border-radius:12px;
+  padding:0 12px;
+  font-size:17px;
+  background:white;
   outline:none;
 }
 
 .todo-add-button{
-  width:42px;
-  height:38px;
+  width:50px;
+  height:46px;
   border:0;
-  border-radius:10px;
+  border-radius:12px;
   background:#17202a;
   color:white;
-  font-size:22px;
+  font-size:24px;
   cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-
-.todo-add-button:active{
-  transform:scale(.94);
 }
 
 .todo-status{
-  font-size:11px;
-  opacity:.55;
-  margin-top:6px;
-  min-height:13px;
+  font-size:12px;
+  opacity:.6;
+  margin-top:7px;
+  min-height:15px;
 }
 
 .todo-empty{
-  font-size:13px;
+  font-size:15px;
   opacity:.55;
-  padding:8px 2px;
+  padding:10px 2px;
+}
+
+.utility-question{
+  margin-top:24px;
+  text-align:center;
+  font-size:18px;
+  font-weight:800;
+}
+
+.bored-buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
+
+.child-button{
+  border:0;
+  border-radius:16px;
+  padding:18px 12px;
+  background:rgba(23,32,42,.08);
+  font-size:20px;
+  font-weight:850;
+  cursor:pointer;
+}
+
+.bored-result{
+  display:none;
+  margin-top:18px;
+  padding:18px;
+  border-radius:16px;
+  background:rgba(23,32,42,.05);
+  white-space:pre-wrap;
+  font-size:17px;
+  line-height:1.45;
 }
 
 /* =========================
@@ -664,20 +610,11 @@ html,body{
   .event-time{font-size:18px}
   .bottom{min-height:90px}
 
-  .todo-box{
-    max-height:38vh;
-  }
 
 }
 
 @media(max-width:700px){
 
-  .todo-box{
-    right:10px;
-    top:50%;
-    transform:translateY(-50%);
-    width:270px;
-  }
 
 }
 
@@ -708,13 +645,10 @@ html,body{
     font-size:16px
   }
 
-  .todo-box{
-    width:calc(100% - 20px);
-    right:10px;
-    top:50%;
-    transform:translateY(-50%);
-    max-height:34vh;
-  }
+  .utility-modal{padding:10px}
+  .utility-card{width:100%;max-height:92vh;padding:20px}
+  .bored-buttons{grid-template-columns:1fr}
+
 
 }
 </style>
@@ -831,18 +765,25 @@ html,body{
       id="mealButton"
       class="meal-button"
       onclick="loadMealPlan()">
-
-      🍽️ VIIKON RUOAT
-
+      🍽️ SUUNNITTELE RUOKALISTA
     </button>
 
     <button
-      id="boredButton"
-      class="bored-button"
+      class="meal-button"
+      onclick="openSavedMealPlan()">
+      📋 VIIKON RUOAT
+    </button>
+
+    <button
+      class="meal-button"
       onclick="openBoredMenu()">
-
       😴 TYLSÄÄ
+    </button>
 
+    <button
+      class="meal-button"
+      onclick="openTodoPopup()">
+      ✅ TODO
     </button>
 
     <div id="mealStatus" class="meal-status"></div>
@@ -902,70 +843,70 @@ html,body{
 
 
 <!-- =========================
-     TODO
+     TODO POPUP
 ========================= -->
 
-<div class="todo-box">
+<div id="todoModal" class="utility-modal">
 
-  <div class="todo-header">
+  <div class="utility-card todo-card">
 
-    <div class="todo-title">
-      ✅ TODO
+    <button class="utility-close" onclick="closeTodoPopup()">×</button>
+
+    <div class="utility-title">✅ TODO</div>
+    <div id="todoCount" class="utility-subtitle"></div>
+
+    <div id="todoList" class="todo-list-popup">
+      <div class="todo-empty">Haetaan tehtäviä…</div>
     </div>
 
-    <div id="todoCount" class="todo-count"></div>
+    <div class="todo-add">
+      <input
+        id="todoInput"
+        class="todo-input"
+        type="text"
+        placeholder="Uusi tehtävä…"
+        autocomplete="off"
+        enterkeyhint="done">
 
-  </div>
-
-  <div id="todoList" class="todo-list">
-    <div class="todo-empty">
-      Haetaan tehtäviä…
+      <button
+        id="todoAddButton"
+        class="todo-add-button"
+        onclick="addTodoFromPage()">
+        +
+      </button>
     </div>
-  </div>
 
-  <div class="todo-add">
-
-    <input
-      id="todoInput"
-      class="todo-input"
-      type="text"
-      placeholder="Uusi tehtävä…"
-      autocomplete="off"
-      enterkeyhint="done">
-
-    <button
-      id="todoAddButton"
-      class="todo-add-button"
-      onclick="addTodoFromPage()">
-      +
-    </button>
+    <div id="todoStatus" class="todo-status"></div>
 
   </div>
-
-  <div id="todoStatus" class="todo-status"></div>
 
 </div>
 
 
 <!-- =========================
-     TYLSÄÄ / TEKEMISTÄ POPUP
+     TYLSÄÄ POPUP
 ========================= -->
 
-<div id="boredModal" class="bored-modal">
+<div id="boredModal" class="utility-modal">
 
-  <button class="bored-close" onclick="closeBoredMenu()">×</button>
+  <div class="utility-card bored-card">
 
-  <div class="bored-title">😴 OLETKO:</div>
-  <div class="bored-subtitle">Valitse kumpi tarvitsee tekemistä.</div>
+    <button class="utility-close" onclick="closeBoredMenu()">×</button>
 
-  <div class="bored-choices">
-    <button class="bored-choice" onclick="showActivities('valtteri')">VALTTERI</button>
-    <button class="bored-choice" onclick="showActivities('emilia')">EMILIA</button>
+    <div class="utility-title">😴 TYLSÄÄ?</div>
+    <div class="utility-question">OLETKO:</div>
+
+    <div class="bored-buttons">
+      <button class="child-button" onclick="showActivities('valtteri')">👦 VALTTERI</button>
+      <button class="child-button" onclick="showActivities('emilia')">👧 EMILIA</button>
+    </div>
+
+    <div id="boredResult" class="bored-result"></div>
+
   </div>
 
-  <div id="boredResult" class="bored-result" style="display:none"></div>
-
 </div>
+
 
 <!-- =========================
      RUOKALISTAN POPUP
@@ -981,8 +922,10 @@ html,body{
 
   </button>
 
+  <div id="mealSavedInfo" style="font-size:12px;opacity:.55;margin-bottom:10px"></div>
+
   <div id="mealPlanContent">
-    Haetaan ruokalistaa…
+    Ruokalistaa ei ole vielä suunniteltu.
   </div>
 
 </div>
@@ -1900,106 +1843,105 @@ function escapeHtml(text){
 
 function loadMealPlan(){
 
-  const button=
-    document.getElementById("mealButton");
-
-  const status=
-    document.getElementById("mealStatus");
-
-  const popup=
-    document.getElementById("mealPlan");
-
-  const content=
-    document.getElementById("mealPlanContent");
+  const button=document.getElementById("mealButton");
+  const status=document.getElementById("mealStatus");
+  const popup=document.getElementById("mealPlan");
+  const content=document.getElementById("mealPlanContent");
+  const info=document.getElementById("mealSavedInfo");
 
   button.disabled=true;
-
-  status.textContent=
-    "Suunnitellaan viikon ruokia…";
-
-  content.textContent=
-    "Haetaan kalenteria ja pyydetään Geminiä suunnittelemaan ruokalista…";
-
+  status.textContent="Suunnitellaan viikon ruokia…";
+  content.textContent="Haetaan kalenteria ja pyydetään Geminiä suunnittelemaan ruokalista…";
+  info.textContent="";
   popup.classList.add("show");
 
-  window.mealPlanCallback=
-    function(data){
-
-      button.disabled=false;
-
-      if(
-        !data ||
-        data.success!==true
-      ){
-
-        status.textContent=
-          "Ruokalistan haku epäonnistui.";
-
-        content.textContent=
-          "Virhe: "+
-          (
-            data &&
-            data.error
-            ?
-            data.error
-            :
-            "Tuntematon virhe."
-          );
-
-        return;
-
-      }
-
-      status.textContent=
-        "Ruokalista valmis";
-
-      content.textContent=
-        data.mealplan ||
-        "Gemini ei palauttanut ruokalistaa.";
-
-    };
-
-  const old=
-    document.getElementById("mealPlanScript");
-
-  if(old){
-    old.remove();
-  }
-
-  const script=
-    document.createElement("script");
-
-  script.id="mealPlanScript";
-
-  script.src=
-    CALENDAR_API+
-    "?action=mealplan"+
-    "&callback=mealPlanCallback"+
-    "&t="+
-    Date.now();
-
-  script.onerror=function(){
+  window.mealPlanCallback=function(data){
 
     button.disabled=false;
 
-    status.textContent=
-      "Ruokalistan haku epäonnistui.";
+    if(!data || data.success!==true){
+      status.textContent="Ruokalistan haku epäonnistui.";
+      content.textContent="Virhe: "+(data && data.error ? data.error : "Tuntematon virhe.");
+      return;
+    }
 
-    content.textContent=
-      "Apps Scriptiin ei saatu yhteyttä.";
+    const mealplan=data.mealplan || "";
 
+    if(!mealplan){
+      status.textContent="Ruokalistan haku epäonnistui.";
+      content.textContent="Gemini ei palauttanut ruokalistaa.";
+      return;
+    }
+
+    const savedAt=new Date().toISOString();
+
+    try{
+      localStorage.setItem("seinaKalenteriMealPlan",mealplan);
+      localStorage.setItem("seinaKalenteriMealPlanSavedAt",savedAt);
+    }catch(e){
+      console.log("Ruokalistan tallennus:",e);
+    }
+
+    status.textContent="Ruokalista valmis";
+    content.textContent=mealplan;
+    updateMealSavedInfo(savedAt);
+  };
+
+  const old=document.getElementById("mealPlanScript");
+  if(old)old.remove();
+
+  const script=document.createElement("script");
+  script.id="mealPlanScript";
+  script.src=CALENDAR_API+
+    "?action=mealplan"+
+    "&callback=mealPlanCallback"+
+    "&t="+Date.now();
+
+  script.onerror=function(){
+    button.disabled=false;
+    status.textContent="Ruokalistan haku epäonnistui.";
+    content.textContent="Apps Scriptiin ei saatu yhteyttä.";
   };
 
   document.body.appendChild(script);
+}
 
+function openSavedMealPlan(){
+  const popup=document.getElementById("mealPlan");
+  const content=document.getElementById("mealPlanContent");
+  let saved="";
+  let savedAt="";
+
+  try{
+    saved=localStorage.getItem("seinaKalenteriMealPlan") || "";
+    savedAt=localStorage.getItem("seinaKalenteriMealPlanSavedAt") || "";
+  }catch(e){}
+
+  content.textContent=saved || "Ruokalistaa ei ole vielä suunniteltu. Paina ensin SUUNNITTELE RUOKALISTA.";
+  updateMealSavedInfo(savedAt);
+  popup.classList.add("show");
+}
+
+function updateMealSavedInfo(savedAt){
+  const info=document.getElementById("mealSavedInfo");
+  if(!info)return;
+
+  if(!savedAt){
+    info.textContent="";
+    return;
+  }
+
+  const d=new Date(savedAt);
+  if(isNaN(d.getTime())){
+    info.textContent="";
+    return;
+  }
+
+  info.textContent="Tallennettu "+d.toLocaleDateString("fi-FI")+" klo "+d.toLocaleTimeString("fi-FI",{hour:"2-digit",minute:"2-digit"});
 }
 
 function closeMealPlan(){
-
-  document
-    .getElementById("mealPlan")
-    .classList.remove("show");
-
+  document.getElementById("mealPlan").classList.remove("show");
 }
 
 
@@ -2013,8 +1955,8 @@ const activities={
     "🕵️ Tee kotietsintä: piilota 5 tavaraa ja piirrä kartta, jonka avulla toinen löytää ne.",
     "✏️ Piirrä oma sarjakuva, jossa on vähintään 4 ruutua ja yksi hauska juoni.",
     "⚽ Keksi 10 minuutin pallotemppurata ja yritä parantaa omaa ennätystä.",
-    "✈️ Tee paperilennokki ja järjestä olohuoneessa pisimmän lennon kilpailu.",
-    "🍳 Valmista aikuisen kanssa pieni välipala ja kata samalla pöytä koko perheelle.",
+    "✈️ Tee paperilennokki ja järjestä pisimmän lennon kilpailu.",
+    "🍳 Valmista aikuisen kanssa pieni välipala ja kata pöytä koko perheelle.",
     "🧩 Valitse palapeli, rakennussarja tai muu keskittymistä vaativa tehtävä ja tee sitä 30 min."
   ],
   emilia:[
@@ -2029,8 +1971,9 @@ const activities={
 };
 
 function openBoredMenu(){
-  document.getElementById("boredResult").style.display="none";
-  document.getElementById("boredResult").textContent="";
+  const result=document.getElementById("boredResult");
+  result.style.display="none";
+  result.textContent="";
   document.getElementById("boredModal").classList.add("show");
 }
 
@@ -2040,7 +1983,7 @@ function closeBoredMenu(){
 
 function showActivities(child){
   const list=activities[child] || [];
-  const shuffled=list.slice().sort(()=>Math.random()-.5);
+  const shuffled=list.slice().sort(function(){return Math.random()-.5});
   const selected=shuffled.slice(0,3);
   const name=child==="valtteri" ? "VALTTERILLE" : "EMILIALLE";
   const result=document.getElementById("boredResult");
@@ -2059,6 +2002,16 @@ function showActivities(child){
 ========================= */
 
 let todoItems=[];
+
+function openTodoPopup(){
+  document.getElementById("todoModal").classList.add("show");
+  setTodoStatus("Haetaan tehtäviä…");
+  loadTodos();
+}
+
+function closeTodoPopup(){
+  document.getElementById("todoModal").classList.remove("show");
+}
 
 function loadTodos(){
 
@@ -2397,10 +2350,12 @@ document
   );
 
 
+document.getElementById("todoModal").addEventListener("click",function(event){
+  if(event.target===this)closeTodoPopup();
+});
+
 document.getElementById("boredModal").addEventListener("click",function(event){
-  if(event.target===this){
-    closeBoredMenu();
-  }
+  if(event.target===this)closeBoredMenu();
 });
 
 /* =========================
@@ -2414,12 +2369,11 @@ setInterval(
   5*60*1000
 );
 
-loadTodos();
-
-setInterval(
-  loadTodos,
-  60*1000
-);
+setInterval(function(){
+  if(document.getElementById("todoModal").classList.contains("show")){
+    loadTodos();
+  }
+},60*1000);
 
 </script>
 
