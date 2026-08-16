@@ -317,6 +317,34 @@ html,body{
   opacity:.55
 }
 
+.todo-button-wrap{
+  position:relative;
+}
+
+.todo-badge{
+  position:absolute;
+  top:-7px;
+  right:-7px;
+  min-width:21px;
+  height:21px;
+  padding:0 6px;
+  border-radius:11px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:#17202a;
+  color:#fff;
+  border:2px solid rgba(255,255,255,.95);
+  box-shadow:0 2px 6px rgba(0,0,0,.18);
+  font-size:11px;
+  font-weight:850;
+  line-height:1;
+}
+
+.todo-badge.show{
+  display:flex;
+}
+
 .meal-status{
   font-size:12px;
   opacity:.65
@@ -845,11 +873,14 @@ html,body{
       😴 TYLSÄÄ
     </button>
 
-    <button
-      class="meal-button"
-      onclick="openTodoPopup()">
-      ✅ TODO
-    </button>
+    <div class="todo-button-wrap">
+      <button
+        class="meal-button"
+        onclick="openTodoPopup()">
+        ✅ TODO
+      </button>
+      <span id="todoBadge" class="todo-badge"></span>
+    </div>
 
     <button
       class="meal-button"
@@ -2277,6 +2308,7 @@ function renderTodos(){
       '<div class="todo-empty">Ei tehtäviä 🎉</div>';
 
     count.textContent="";
+    updateTodoBadge(0);
 
     return;
 
@@ -2290,6 +2322,8 @@ function renderTodos(){
   count.textContent=
     openCount+
     " jäljellä";
+
+  updateTodoBadge(openCount);
 
   container.innerHTML=
     todoItems
@@ -2511,6 +2545,26 @@ function addTodoFromPage(){
 }
 
 
+function updateTodoBadge(count){
+
+  const badge=
+    document.getElementById("todoBadge");
+
+  if(!badge)return;
+
+  const n=Number(count)||0;
+
+  if(n>0){
+    badge.textContent=n>99 ? "99+" : String(n);
+    badge.classList.add("show");
+  }else{
+    badge.textContent="";
+    badge.classList.remove("show");
+  }
+
+}
+
+
 function setTodoStatus(text){
 
   document.getElementById(
@@ -2553,17 +2607,17 @@ document.getElementById("boredModal").addEventListener("click",function(event){
 ========================= */
 
 loadCalendar();
+loadTodos();
 
 setInterval(
   loadCalendar,
   5*60*1000
 );
 
-setInterval(function(){
-  if(document.getElementById("todoModal").classList.contains("show")){
-    loadTodos();
-  }
-},60*1000);
+setInterval(
+  loadTodos,
+  60*1000
+);
 
 </script>
 
