@@ -439,6 +439,90 @@ html,body{
 }
 
 /* =========================
+   KLIKATTAVA RUOKALISTA + RESEPTI
+========================= */
+
+.meal-list-hint{
+  font-size:13px;
+  opacity:.62;
+  margin:4px 0 14px;
+}
+
+.meal-day-card{
+  display:grid;
+  grid-template-columns:54px 1fr;
+  gap:10px;
+  align-items:center;
+  padding:9px 0;
+  border-top:1px solid rgba(30,40,50,.10);
+}
+
+.meal-day-card:first-of-type{
+  border-top:0;
+}
+
+.meal-day-label{
+  font-size:15px;
+  font-weight:900;
+  letter-spacing:.7px;
+}
+
+.meal-food-button{
+  width:100%;
+  text-align:left;
+  border:0;
+  border-radius:12px;
+  padding:11px 13px;
+  background:rgba(23,32,42,.07);
+  color:#17202a;
+  font-size:17px;
+  line-height:1.25;
+  font-weight:750;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.meal-food-button:active{
+  transform:scale(.985);
+  background:rgba(23,32,42,.12);
+}
+
+.meal-tip{
+  margin-top:15px;
+  padding:12px 14px;
+  border-radius:13px;
+  background:rgba(255,255,255,.55);
+  font-size:14px;
+  line-height:1.35;
+}
+
+.recipe-card{
+  width:min(680px,92vw);
+  max-height:88vh;
+  overflow-y:auto;
+}
+
+.recipe-food-name{
+  font-size:23px;
+  font-weight:900;
+  line-height:1.2;
+  padding-right:42px;
+  margin-bottom:5px;
+}
+
+.recipe-subtitle{
+  font-size:13px;
+  opacity:.58;
+  margin-bottom:14px;
+}
+
+.recipe-content{
+  white-space:pre-wrap;
+  font-size:17px;
+  line-height:1.5;
+}
+
+/* =========================
    TODO + TYLSÄÄ POPUPIT
 ========================= */
 
@@ -1115,6 +1199,28 @@ html,body{
 
   <div id="mealPlanContent">
     Ruokalistaa ei ole vielä suunniteltu.
+  </div>
+
+</div>
+
+
+<!-- =========================
+     RESEPTI POPUP
+========================= -->
+
+<div id="recipeModal" class="utility-modal">
+
+  <div class="utility-card recipe-card">
+
+    <button class="utility-close" onclick="closeRecipe()">×</button>
+
+    <div id="recipeFoodName" class="recipe-food-name">🍳 Resepti</div>
+    <div class="recipe-subtitle">Gemini tekee reseptin 2 aikuiselle + 2 lapselle</div>
+
+    <div id="recipeContent" class="recipe-content">
+      Haetaan reseptiä…
+    </div>
+
   </div>
 
 </div>
@@ -2055,7 +2161,7 @@ function loadMealPlan(){
     }
 
     status.textContent="Ruokalista valmis";
-    content.textContent=mealplan;
+    renderMealPlan(mealplan);
     updateMealSavedInfo(savedAt);
   };
 
@@ -2080,7 +2186,6 @@ function loadMealPlan(){
 
 function openSavedMealPlan(){
   const popup=document.getElementById("mealPlan");
-  const content=document.getElementById("mealPlanContent");
   let saved="";
   let savedAt="";
 
@@ -2089,9 +2194,98 @@ function openSavedMealPlan(){
     savedAt=localStorage.getItem("seinaKalenteriMealPlanSavedAt") || "";
   }catch(e){}
 
-  content.textContent=saved || "Ruokalistaa ei ole vielä suunniteltu. Paina ensin SUUNNITTELE RUOKALISTA.";
+  if(saved){
+    renderMealPlan(saved);
+  }else{
+    document.getElementById("mealPlanContent").textContent=
+      "Ruokalistaa ei ole vielä suunniteltu. Paina ensin SUUNNITTELE RUOKALISTA.";
+  }
+
   updateMealSavedInfo(savedAt);
   popup.classList.add("show");
+}
+
+function parseMealPlan(text){
+
+  const days=["MA","TI","KE","TO","PE","LA","SU"];
+  const result=[];
+  const lines=String(text || "")
+    .split(/\r?\n/)
+    .map(function(line){
+      return line.trim().replace(/^\*\*|\*\*$/g,"").trim();
+    });
+
+  let currentDay="";
+  let tipLines=[];
+  let inTip=false;
+
+  lines.forEach(function(line){
+
+    if(!line)return;
+
+    const clean=line.replace(/[：:]+$/,"").trim().toUpperCase();
+
+    if(/^💡\s*VINKKI/i.test(line) || clean==="VINKKI"){
+      inTip=true;
+      currentDay="";
+      return;
+    }
+
+    if(inTip){
+      tipLines.push(line);
+      return;
+    }
+
+    if(days.indexOf(clean)!==-1){
+      currentDay=clean;
+      return;
+    }
+
+    if(currentDay){
+      result.push({day:currentDay,food:line});
+      currentDay="";
+    }
+  });
+
+  return {
+    meals:result,
+    tip:tipLines.join(" ")
+  };
+}
+
+function renderMealPlan(text){
+
+  const content=document.getElementById("mealPlanContent");
+  const parsed=parseMealPlan(text);
+
+  if(!parsed.meals.length){
+    content.textContent=text;
+    return;
+  }
+
+  let html='<div class="meal-list-hint">Paina ruoan nimeä, niin saat siitä reseptin.</div>';
+
+  parsed.meals.forEach(function(item){
+    html+=
+      '<div class="meal-day-card">'+
+        '<div class="meal-day-label">'+escapeHtml(item.day)+'</div>'+
+        '<button type="button" class="meal-food-button" data-food="'+escapeHtml(item.food)+'">'+
+          escapeHtml(item.food)+
+        '</button>'+
+      '</div>';
+  });
+
+  if(parsed.tip){
+    html+='<div class="meal-tip"><strong>💡 VINKKI</strong><br>'+escapeHtml(parsed.tip)+'</div>';
+  }
+
+  content.innerHTML=html;
+
+  content.querySelectorAll(".meal-food-button").forEach(function(button){
+    button.addEventListener("click",function(){
+      openRecipe(this.getAttribute("data-food") || this.textContent);
+    });
+  });
 }
 
 function updateMealSavedInfo(savedAt){
@@ -2115,6 +2309,68 @@ function updateMealSavedInfo(savedAt){
 function closeMealPlan(){
   document.getElementById("mealPlan").classList.remove("show");
 }
+
+
+/* =========================
+   AI RESEPTI
+========================= */
+
+function openRecipe(food){
+
+  food=String(food || "").trim();
+  if(!food)return;
+
+  const modal=document.getElementById("recipeModal");
+  const title=document.getElementById("recipeFoodName");
+  const content=document.getElementById("recipeContent");
+
+  title.textContent="🍳 "+food;
+  content.textContent="Gemini tekee reseptiä…";
+  modal.classList.add("show");
+
+  const callbackName="recipeCallback_"+Date.now();
+
+  window[callbackName]=function(data){
+
+    if(!data || data.success!==true){
+      content.textContent="Reseptin haku epäonnistui: "+(data && data.error ? data.error : "Tuntematon virhe.");
+      return;
+    }
+
+    content.textContent=data.recipe || "Gemini ei palauttanut reseptiä.";
+
+    setTimeout(function(){
+      try{ delete window[callbackName]; }catch(e){}
+    },1000);
+  };
+
+  const old=document.getElementById("recipeScript");
+  if(old)old.remove();
+
+  const script=document.createElement("script");
+  script.id="recipeScript";
+  script.src=CALENDAR_API+
+    "?action=recipe"+
+    "&food="+encodeURIComponent(food)+
+    "&callback="+encodeURIComponent(callbackName)+
+    "&t="+Date.now();
+
+  script.onerror=function(){
+    content.textContent="Apps Scriptiin ei saatu yhteyttä reseptiä haettaessa.";
+  };
+
+  document.body.appendChild(script);
+}
+
+function closeRecipe(){
+  document.getElementById("recipeModal").classList.remove("show");
+}
+
+document.getElementById("recipeModal").addEventListener("click",function(event){
+  if(event.target===this){
+    closeRecipe();
+  }
+});
 
 
 /* =========================
